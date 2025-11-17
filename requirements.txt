@@ -1,0 +1,48 @@
+gradio
+requests
+httpx
+
+# LlamaIndex Core
+llama-index-core
+llama-index-llms-huggingface
+llama-index-llms-openai
+llama-index-embeddings-huggingface
+
+# LlamaIndex Readers (using official readers instead of tools)
+llama-index-readers-wikipedia
+llama-index-readers-arxiv
+llama-index-readers-weather
+
+# Configuration Management
+pydantic>=2.0.0
+pydantic-settings>=2.0.0
+
+# Web Search and Scraping
+duckduckgo-search
+beautifulsoup4
+lxml
+
+# File Processing
+pillow
+pypdf
+python-docx
+openpyxl
+pandas
+
+# Code Execution and Math
+sympy
+numpy
+
+# Environment Management
+python-dotenv
+
+# Logging
+loguru
+
+# Additional utilities
+nest-asyncio
+pyowm  # For weather API
+
+# Multimodal Support (optional but recommended)
+torch
+torchvision
