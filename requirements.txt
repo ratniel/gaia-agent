@@ -1,48 +1,48 @@
-gradio
-requests
-httpx
+gradio==6.0.0
+requests==2.32.5
+httpx==0.28.1
 
 # LlamaIndex Core
-llama-index-core
-llama-index-llms-huggingface
-llama-index-llms-openai
-llama-index-embeddings-huggingface
+llama-index-core==0.14.8
+llama-index-llms-huggingface==0.6.1
+llama-index-llms-huggingface-api==0.6.1
+llama-index-embeddings-huggingface==0.6.1
 
 # LlamaIndex Readers (using official readers instead of tools)
-llama-index-readers-wikipedia
-llama-index-readers-arxiv
-llama-index-readers-weather
+llama-index-readers-wikipedia==0.4.1
+llama-index-tools-arxiv==0.4.1
+llama-index-readers-weather==0.4.1
 
 # Configuration Management
-pydantic>=2.0.0
-pydantic-settings>=2.0.0
+pydantic==2.12.4
+pydantic-settings==2.12.0
 
 # Web Search and Scraping
-duckduckgo-search
-beautifulsoup4
-lxml
+duckduckgo-search==8.1.1
+beautifulsoup4==4.14.2
+lxml==6.0.2
 
 # File Processing
-pillow
-pypdf
-python-docx
-openpyxl
-pandas
+pillow==12.0.0
+pypdf==6.4.0
+python-docx==1.2.0
+openpyxl==3.1.5
+pandas==2.3.3
 
 # Code Execution and Math
-sympy
-numpy
+sympy==1.14.0
+numpy==2.3.5
 
 # Environment Management
-python-dotenv
+python-dotenv==1.2.1
 
 # Logging
-loguru
+loguru==0.7.3
 
 # Additional utilities
-nest-asyncio
-pyowm  # For weather API
+nest-asyncio==1.6.0
+pyowm==3.5.0  # For weather API
 
 # Multimodal Support (optional but recommended)
-torch
-torchvision
+torch==2.9.1
+torchvision==0.24.1

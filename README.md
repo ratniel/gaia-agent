@@ -1,3 +1,14 @@
+---
+title: GAIA Agent
+emoji: 🤖
+colorFrom: blue
+colorTo: purple
+sdk: gradio
+sdk_version: "4.0.0"
+app_file: app.py
+pinned: false
+---
+
 # 🤖 GAIA Agent - Enhanced Production Ready
 
 [![HuggingFace](https://img.shields.io/badge/HuggingFace-Agents%20Course-orange)](https://huggingface.co/learn/agents-course)
