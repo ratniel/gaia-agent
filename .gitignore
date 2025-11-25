@@ -1,1 +1,17 @@
+# environment specific
+.venv/
 .env
+
+# specstory output
+.specstory/
+
+# python files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.pywz
+*.pyzw
+*.pyz

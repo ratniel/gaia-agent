@@ -6,7 +6,7 @@ This is the updated version using all the new improvements.
 from typing import Optional
 
 from llama_index.core.agent import ReActAgent
-from llama_index.llms.huggingface import HuggingFaceInferenceAPI
+from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from llama_index.llms.openai import OpenAI
 
 from config import get_settings
