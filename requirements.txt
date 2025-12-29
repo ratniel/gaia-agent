@@ -3,31 +3,31 @@ requests==2.32.5
 httpx==0.28.1
 
 # LlamaIndex Core
-llama-index-core==0.14.8
+llama-index-core==0.14.10
 llama-index-llms-huggingface==0.6.1
 llama-index-llms-huggingface-api==0.6.1
-llama-index-llms-openai==0.3.0
+llama-index-llms-openai==0.6.12
 llama-index-llms-gemini==0.6.1
 llama-index-embeddings-huggingface==0.6.1
-llama-index-workflows==0.2.0
+llama-index-workflows==2.11.6
 
-# LlamaIndex Readers (using official readers instead of tools)
+# LlamaIndex Readers
 llama-index-readers-wikipedia==0.4.1
 llama-index-tools-arxiv==0.4.1
 llama-index-readers-weather==0.4.1
 
 # Configuration Management
-pydantic==2.12.4
+pydantic==2.12.5
 pydantic-settings==2.12.0
 
 # Web Search and Scraping
 duckduckgo-search==8.1.1
-beautifulsoup4==4.14.2
+beautifulsoup4==4.14.3
 lxml==6.0.2
 
 # File Processing
-pillow==12.0.0
-pypdf==6.4.0
+pillow==10.4.0
+pypdf==6.5.0
 python-docx==1.2.0
 openpyxl==3.1.5
 pandas==2.2.3
@@ -49,3 +49,4 @@ pyowm==3.5.0  # For weather API
 # Multimodal Support (optional but recommended)
 torch==2.5.1
 torchvision==0.20.1
+
