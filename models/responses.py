@@ -26,21 +26,7 @@ class AgentResponse(BaseModel):
         description="List of tool names that were used"
     )
     
-    class Config:
-        json_schema_extra = {
-            "examples": [
-                {
-                    "answer": "42",
-                    "confidence": 0.95,
-                    "tools_used": ["calculator"]
-                },
-                {
-                    "answer": "Paris",
-                    "confidence": 1.0,
-                    "tools_used": ["wikipedia_search"]
-                }
-            ]
-        }
+
 
 
 class DetailedResponse(AgentResponse):

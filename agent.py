@@ -62,6 +62,8 @@ def create_agent(
             model=full_model_name,
             temperature=settings.agent.temperature,
             api_key=settings.api.gemini_api_key,
+            max_retries=3,
+            is_function_calling_model=True,
         )
         logger.info(f"Using Gemini model: {full_model_name}")
     elif settings.agent.use_hf:
@@ -81,9 +83,20 @@ def create_agent(
             llm = OpenAI(model=model_name, temperature=settings.agent.temperature)
         elif "gemini" in model_name.lower():
             full_model_name = model_name if model_name.startswith("models/") else f"models/{model_name}"
-            llm = GoogleGenAI(model=full_model_name, temperature=settings.agent.temperature, api_key=settings.api.gemini_api_key)
+            llm = GoogleGenAI(
+                model=full_model_name,
+                temperature=settings.agent.temperature,
+                api_key=settings.api.gemini_api_key,
+                max_retries=3,
+                is_function_calling_model=True,
+            )
         else:
-            llm = HuggingFaceInferenceAPI(model_name=model_name, token=settings.api.hf_token, temperature=settings.agent.temperature)
+            llm = HuggingFaceInferenceAPI(
+                model_name=model_name,
+                token=settings.api.hf_token,
+                temperature=settings.agent.temperature,
+                provider="auto",
+            )
         logger.info(f"Using detected model: {model_name}")
     
     # Convert to structured LLM if needed
