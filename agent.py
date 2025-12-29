@@ -9,7 +9,7 @@ from typing import Optional
 from llama_index.core.agent import ReActAgent
 from llama_index.llms.huggingface_api import HuggingFaceInferenceAPI
 from llama_index.llms.openai import OpenAI
-from llama_index.llms.gemini import Gemini
+from llama_index.llms.google_genai import GoogleGenAI
 
 from config import get_settings
 from config.logging_config import get_logger
@@ -58,7 +58,7 @@ def create_agent(
     elif settings.agent.use_gemini:
         # LlamaIndex Gemini usually expects models/ prefix for some operations
         full_model_name = model_name if model_name.startswith("models/") else f"models/{model_name}"
-        llm = Gemini(
+        llm = GoogleGenAI(
             model=full_model_name,
             temperature=settings.agent.temperature,
             api_key=settings.api.gemini_api_key,
@@ -81,7 +81,7 @@ def create_agent(
             llm = OpenAI(model=model_name, temperature=settings.agent.temperature)
         elif "gemini" in model_name.lower():
             full_model_name = model_name if model_name.startswith("models/") else f"models/{model_name}"
-            llm = Gemini(model=full_model_name, temperature=settings.agent.temperature, api_key=settings.api.gemini_api_key)
+            llm = GoogleGenAI(model=full_model_name, temperature=settings.agent.temperature, api_key=settings.api.gemini_api_key)
         else:
             llm = HuggingFaceInferenceAPI(model_name=model_name, token=settings.api.hf_token, temperature=settings.agent.temperature)
         logger.info(f"Using detected model: {model_name}")
