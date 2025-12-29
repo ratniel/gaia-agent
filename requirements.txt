@@ -1,4 +1,4 @@
-gradio==6.0.0
+gradio==6.2.0
 requests==2.32.5
 httpx==0.28.1
 
@@ -27,11 +27,11 @@ pillow==12.0.0
 pypdf==6.4.0
 python-docx==1.2.0
 openpyxl==3.1.5
-pandas==2.3.3
+pandas==2.2.3
 
 # Code Execution and Math
-sympy==1.14.0
-numpy==2.3.5
+sympy==1.13.1
+numpy==2.2.6
 
 # Environment Management
 python-dotenv==1.2.1
@@ -44,5 +44,5 @@ nest-asyncio==1.6.0
 pyowm==3.5.0  # For weather API
 
 # Multimodal Support (optional but recommended)
-torch==2.9.1
-torchvision==0.24.1
+torch==2.5.1
+torchvision==0.20.1

@@ -4,7 +4,7 @@ from typing import Optional
 
 from llama_index.core.tools import FunctionTool
 from llama_index.readers.wikipedia import WikipediaReader
-from llama_index.readers.papers import ArxivReader
+from llama_index.tools.arxiv import ArxivToolSpec
 from llama_index.readers.weather import WeatherReader
 
 from config import get_settings
@@ -72,34 +72,41 @@ def search_arxiv(query: str, max_results: int = 3) -> str:
     try:
         logger.info(f"Searching arXiv for: {query}")
         
-        reader = ArxivReader()
+        arxiv_spec = ArxivToolSpec()
         
-        # Search arXiv
-        docs = reader.load_data(
-            search_query=query,
-            max_results=max_results
-        )
+        # Search arXiv using the tool spec
+        # The tool returns documents
+        results_list = arxiv_spec.arxiv_query(query=query)
         
-        if not docs:
+        if not results_list:
             return f"No arXiv papers found for: {query}"
         
-        # Format results
+        # Format results (ArxivToolSpec returns list of Document-like objects)
         results = []
-        for i, doc in enumerate(docs, 1):
-            title = doc.metadata.get('title', 'Unknown')
-            authors = doc.metadata.get('authors', [])
-            published = doc.metadata.get('published', 'Unknown date')
+        for i, doc in enumerate(results_list[:max_results], 1):
+            # ArxivToolSpec results are often strings or objects with metadata
+            # Let's handle it robustly
+            if hasattr(doc, 'text'):
+                content = doc.text
+                metadata = getattr(doc, 'metadata', {})
+            else:
+                content = str(doc)
+                metadata = {}
+
+            title = metadata.get('title', 'Unknown Title')
+            authors = metadata.get('authors', [])
+            published = metadata.get('published', 'Unknown Date')
             
             # Format authors
             if isinstance(authors, list) and authors:
-                author_str = ", ".join(authors[:3])
+                author_str = ", ".join([str(a) for a in authors[:3]])
                 if len(authors) > 3:
                     author_str += " et al."
             else:
-                author_str = str(authors) if authors else "Unknown authors"
+                author_str = str(authors) if authors else "Unknown Authors"
             
-            # Get summary (first 500 chars)
-            summary = doc.text[:500] + "..." if len(doc.text) > 500 else doc.text
+            # Get summary
+            summary = content[:500] + "..." if len(content) > 500 else content
             
             results.append(
                 f"[{i}] {title}\n"
