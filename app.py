@@ -193,69 +193,81 @@ def run_and_submit_all( profile: gr.OAuthProfile | None):
         return status_message, results_df
 
 
+# --- Custom CSS for Dark/Minimal Theme ---
+custom_css = """
+body { background-color: #0b0f19; color: #e2e8f0; }
+.gradio-container { font-family: 'Inter', -apple-system, sans-serif; }
+h1, h2, h3 { font-weight: 600; letter-spacing: -0.025em; }
+.contain { border: 1px solid #1e293b !important; background: #0f172a !important; border-radius: 8px !important; }
+/* Make buttons minimal */
+button.primary { background-color: #3b82f6 !important; color: white !important; font-weight: 500; border-radius: 6px; }
+button.primary:hover { background-color: #2563eb !important; }
+/* Status box styling */
+textarea { font-family: 'JetBrains Mono', monospace !important; font-size: 13px !important; background-color: #1e293b !important; color: #94a3b8 !important; border: 1px solid #334155 !important; }
+"""
+
 # --- Build Gradio Interface ---
-with gr.Blocks(theme=gr.themes.Soft()) as demo:
-    gr.Markdown("# 🤖 Enhanced GAIA Agent - Production Ready")
-    gr.Markdown(
-        f"""
-        ## 🎯 Optimized for 90%+ Accuracy on GAIA Benchmark
-        
-        ### ✨ Key Features:
-        - **Structured Outputs** - Pydantic models ensure clean, exact-match answers
-        - **Type-Safe Configuration** - Pydantic Settings for reliability
-        - **13 Comprehensive Tools** - Official LlamaIndex readers + custom tools
-        - **Retry Logic** - Automatic retry for API failures
-        - **Error Handling** - Comprehensive error management
-        
-        ### 🛠️ Available Tools (13):
-        
-        **Knowledge** (3):
-        - 📚 Wikipedia - Factual information (official LlamaIndex reader)
-        - 🎓 arXiv - Academic papers (official LlamaIndex reader)
-        - 🌤️ Weather - Current weather data (official LlamaIndex reader)
-        
-        **Web Search** (2):
-        - 🌐 Web Search - DuckDuckGo search
-        - 📰 News Search - Recent news articles
-        
-        **Files** (2):
-        - 📁 Download File - Get GAIA task files
-        - 📄 Read File - PDF, Excel, CSV, Word, images, and more
-        
-        **Calculator** (3):
-        - 🧮 Calculate - Mathematical expressions (SymPy)
-        - 📐 Solve Equation - Algebraic solver
-        - ✂️ Simplify - Expression simplification
-        
-        **Code Execution** (2):
-        - 💻 Execute Code - Safe Python with numpy, pandas, sympy
-        - 📊 Analyze Data - Pandas-focused data analysis
-        
-        ### 📋 Instructions:
-        1. **Log in** with your Hugging Face account
-        2. **Click** 'Run Evaluation & Submit All Answers'
-        3. **Wait** 10-30 minutes for completion
-        4. **View** your score and detailed results
-        
-        ### ⚙️ Current Configuration:
-        - **Model**: {settings.agent.model_name}
-        - **Provider**: {'OpenAI' if settings.agent.use_openai else 'HuggingFace'}
-        - **Temperature**: {settings.agent.temperature}
-        - **Max Iterations**: {settings.agent.max_iterations}
-        - **Structured Outputs**: ✅ Enabled
-        
-        ---
-        **💡 Tip:** The agent uses structured outputs for guaranteed exact-match format. No "FINAL ANSWER:" prefix issues!
-        """
-    )
+# Force dark mode via JS
+js_func = """
+function refresh() {
+    const url = new URL(window.location);
+    if (url.searchParams.get('__theme') !== 'dark') {
+        url.searchParams.set('__theme', 'dark');
+        window.location.href = url.href;
+    }
+}
+"""
 
-    gr.LoginButton()
+with gr.Blocks(
+    theme=gr.themes.Soft(primary_hue="slate", neutral_hue="slate"),
+    css=custom_css,
+    js=js_func,
+    title="GAIA Agent"
+) as demo:
+    with gr.Row(variant="panel", elem_classes=["header-row"]):
+        with gr.Column(scale=4):
+           gr.Markdown("# 🌘 GAIA Agent")
+           gr.Markdown("Running **LlamaIndex Workflows** with **Structured Outputs** for high-accuracy reasoning.")
+        with gr.Column(scale=1, min_width=150):
+           gr.LoginButton(scale=1, size="sm")
 
-    run_button = gr.Button("Run Evaluation & Submit All Answers")
+    with gr.Row():
+        # Left Sidebar: Config & Tools
+        with gr.Column(scale=1):
+            with gr.Group():
+                gr.Markdown("### ⚙️ Config")
+                gr.Markdown(f"**Model**: `{settings.agent.model_name}`")
+                gr.Markdown(f"**Provider**: `{'OpenAI' if settings.agent.use_openai else 'Google GenAI' if settings.agent.use_gemini else 'HuggingFace'}`")
+                gr.Markdown(f"**Temp**: `{settings.agent.temperature}`")
+            
+            with gr.Accordion("📚 Available Tools", open=False):
+                gr.Markdown("""
+                - **Knowledge**: Wikipedia, arXiv, Weather
+                - **Web**: Search, News
+                - **Files**: Read, Download
+                - **Math**: Calculator, Solver
+                - **Code**: Python Execution
+                """)
+            
+            with gr.Group():
+                 gr.Markdown("### 📋 Live Logs")
+                 status_output = gr.Textbox(label="Agent Status", lines=15, interactive=False, show_label=False, elem_id="status-box")
 
-    status_output = gr.Textbox(label="Run Status / Submission Result", lines=5, interactive=False)
-    # Removed max_rows=10 from DataFrame constructor
-    results_table = gr.DataFrame(label="Questions and Agent Answers", wrap=True)
+        # Main Content: Action & Results
+        with gr.Column(scale=2):
+            with gr.Group():
+                gr.Markdown("### 🚀 Execute")
+                gr.Markdown("Run the agent on the GAIA benchmark dataset. This will fetch questions, reason through them using tools, and submit answers.")
+                run_button = gr.Button("Start Evaluation & Submit", variant="primary", size="lg")
+            
+            gr.Markdown("### 📊 Results Data")
+            results_table = gr.DataFrame(
+                label="Evaluation Results", 
+                headers=["Task ID", "Question", "Submitted Answer"],
+                interactive=False,
+                wrap=True,
+                elem_id="results-table"
+            )
 
     run_button.click(
         fn=run_and_submit_all,
@@ -263,7 +275,7 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     )
 
 if __name__ == "__main__":
-    print("\n" + "-"*30 + " App Starting " + "-"*30)
+    print("\\n" + "-"*30 + " App Starting " + "-"*30)
     # Check for SPACE_HOST and SPACE_ID at startup for information
     space_host_startup = os.getenv("SPACE_HOST")
     space_id_startup = os.getenv("SPACE_ID") # Get SPACE_ID at startup
@@ -281,7 +293,7 @@ if __name__ == "__main__":
     else:
         print("ℹ️  SPACE_ID environment variable not found (running locally?). Repo URL cannot be determined.")
 
-    print("-"*(60 + len(" App Starting ")) + "\n")
+    print("-"*(60 + len(" App Starting ")) + "\\n")
 
     print("Launching Gradio Interface for Basic Agent Evaluation...")
     demo.launch(debug=True, share=False)
