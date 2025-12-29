@@ -7,7 +7,10 @@ sdk: gradio
 sdk_version: 6.2.0
 app_file: app.py
 pinned: false
-python_version: "3.10"
+python_version: '3.10'
+license: apache-2.0
+# built-in oauth flow
+hf_oauth: true
 ---
 
 # 🤖 GAIA Agent - Enhanced Production Ready
