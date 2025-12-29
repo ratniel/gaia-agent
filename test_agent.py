@@ -73,10 +73,10 @@ async def test_single_question(verbose: bool = True):
         question_obj = None
     
     # Extract details
-    task_id = question_data.get("task_id", "unknown")
-    question = question_data.get("question", "")
-    level = question_data.get("Level", "unknown")
-    ground_truth = question_data.get("Final answer", None)
+    task_id = question_obj.task_id
+    question = question_obj.question
+    level = question_obj.level
+    ground_truth = question_data.get("ground_truth", None)
     
     print(f"Task ID: {task_id}")
     print(f"Level: {level}")

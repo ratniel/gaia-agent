@@ -85,13 +85,12 @@ def check_api_keys():
 def check_files():
     """Check if all required files exist."""
     required_files = [
-        "tools.py",
+        "tools/registry.py",
         "agent.py",
         "workflow.py",
         "test_agent.py",
         "app.py",
-        "config.py",
-        "utils.py",
+        "config/settings.py",
         "requirements.txt",
     ]
     
@@ -110,11 +109,10 @@ def check_files():
 def test_imports():
     """Test importing main modules."""
     modules_to_test = [
-        ("tools", "get_all_tools"),
+        ("tools.registry", "get_all_tools"),
         ("agent", "create_agent"),
         ("workflow", "run_workflow_sync"),
-        ("config", "AGENT_CONFIG"),
-        ("utils", "save_results"),
+        ("config", "get_settings"),
     ]
     
     results = {}
@@ -163,7 +161,7 @@ def main():
         print(f"  Missing packages:")
         for package in missing:
             print(f"    - {package}")
-        print("\n  Install with: pip install -r requirements.txt")
+        print("\n  Install with: uv sync")
     
     # Check .env file
     print("\n🔑 Environment Configuration:")
@@ -196,13 +194,13 @@ def main():
     if all_success and success:
         print("✅ SETUP COMPLETE - Ready to run!")
         print("\nNext steps:")
-        print("  1. Test single question: python test_agent.py")
-        print("  2. Run Gradio app: python app.py")
+        print("  1. Test single question: uv run test_agent.py")
+        print("  2. Run Gradio app: uv run app.py")
         print("  3. Submit to GAIA: Use the Gradio interface")
     else:
         print("⚠️  SETUP INCOMPLETE - Please fix the issues above")
         print("\nQuick fixes:")
-        print("  1. Install dependencies: pip install -r requirements.txt")
+        print("  1. Install dependencies: uv sync")
         print("  2. Create .env file with your HF_TOKEN")
         print("  3. Verify all files are present")
     print("="*80 + "\n")
