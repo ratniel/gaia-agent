@@ -7,7 +7,7 @@ sdk: gradio
 sdk_version: 6.2.0
 app_file: app.py
 pinned: false
-python_version: 3.1
+python_version: "3.10"
 ---
 
 # 🤖 GAIA Agent - Enhanced Production Ready
