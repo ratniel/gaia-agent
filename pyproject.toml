@@ -13,6 +13,7 @@ dependencies = [
     "llama-index-core>=0.14.10",
     "llama-index-embeddings-huggingface>=0.6.1",
     "llama-index-llms-gemini>=0.6.1",
+    "llama-index-llms-openai>=0.3.0",
     "llama-index-llms-huggingface>=0.6.1",
     "llama-index-llms-huggingface-api>=0.6.1",
     "llama-index-readers-weather>=0.4.1",

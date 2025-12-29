@@ -6,7 +6,10 @@ httpx==0.28.1
 llama-index-core==0.14.8
 llama-index-llms-huggingface==0.6.1
 llama-index-llms-huggingface-api==0.6.1
+llama-index-llms-openai==0.3.0
+llama-index-llms-gemini==0.6.1
 llama-index-embeddings-huggingface==0.6.1
+llama-index-workflows==0.2.0
 
 # LlamaIndex Readers (using official readers instead of tools)
 llama-index-readers-wikipedia==0.4.1
