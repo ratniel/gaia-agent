@@ -4,7 +4,7 @@ from typing import Optional
 
 from llama_index.core.tools import FunctionTool
 from llama_index.readers.wikipedia import WikipediaReader
-from llama_index.readers.arxiv import ArxivReader
+from llama_index.readers.papers import ArxivReader
 from llama_index.readers.weather import WeatherReader
 
 from config import get_settings

@@ -8,9 +8,9 @@ class GAIAQuestion(BaseModel):
     
     task_id: str = Field(..., description="Unique task identifier")
     
-    question: str = Field(..., description="The question text")
+    question: str = Field(..., alias="Question", description="The question text")
     
-    level: int | str = Field(..., description="Difficulty level (1, 2, or 3)")
+    level: int | str = Field(..., alias="Level", description="Difficulty level (1, 2, or 3)")
     
     final_answer: str | None = Field(
         None,

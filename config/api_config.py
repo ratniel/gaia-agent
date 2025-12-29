@@ -9,12 +9,15 @@ class APIConfig(BaseSettings):
     
     # Required
     hf_token: str = Field(..., alias="HF_TOKEN", description="HuggingFace API token")
+
+    # Gemini
+    gemini_api_key: str = Field(..., alias="GEMINI_API_KEY", description="Gemini API key")
     
     # Optional API Keys
     openai_api_key: str | None = Field(
-        None, 
+        None,
         alias="OPENAI_API_KEY",
-        description="OpenAI API key for enhanced multimodal support"
+        description="OpenAI API key for enhanced web search"
     )
     openweather_api_key: str | None = Field(
         None,
@@ -40,4 +43,3 @@ class APIConfig(BaseSettings):
         "case_sensitive": False,
         "extra": "ignore",
     }
-

@@ -18,8 +18,6 @@ class AgentResponse(BaseModel):
     
     confidence: float = Field(
         ...,
-        ge=0.0,
-        le=1.0,
         description="Confidence score between 0 and 1"
     )
     
@@ -52,7 +50,6 @@ class DetailedResponse(AgentResponse):
     
     reasoning_steps: int = Field(
         ...,
-        ge=0,
         description="Number of reasoning steps taken"
     )
     
@@ -63,13 +60,11 @@ class DetailedResponse(AgentResponse):
     
     tokens_used: int | None = Field(
         None,
-        ge=0,
         description="Total tokens used (if available)"
     )
     
     execution_time: float | None = Field(
         None,
-        ge=0.0,
         description="Execution time in seconds"
     )
 
@@ -102,8 +97,6 @@ class ComparisonResponse(BaseModel):
     
     similarity: float = Field(
         ...,
-        ge=0.0,
-        le=1.0,
         description="Similarity score"
     )
     

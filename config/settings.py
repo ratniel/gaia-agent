@@ -47,13 +47,6 @@ def validate_settings() -> list[str]:
         settings = get_settings()
         
         # Check required API keys
-        if not settings.api.hf_token:
-            issues.append("HF_TOKEN is required but not set")
-        
-        # Check optional but recommended
-        if not settings.api.openai_api_key:
-            issues.append("OPENAI_API_KEY not set (optional, but recommended for better performance)")
-        
         if not settings.api.openweather_api_key:
             issues.append("OPENWEATHER_API_KEY not set (optional, weather tool will be disabled)")
         
@@ -75,7 +68,6 @@ if __name__ == "__main__":
         
         print("API Configuration:")
         print(f"  HF Token: {'✓ Set' if settings.api.hf_token else '✗ Not set'}")
-        print(f"  OpenAI Key: {'✓ Set' if settings.api.openai_api_key else '✗ Not set (optional)'}")
         print(f"  Weather Key: {'✓ Set' if settings.api.openweather_api_key else '✗ Not set (optional)'}")
         print(f"  GAIA API: {settings.api.gaia_api_url}")
         

@@ -9,15 +9,27 @@ class AgentConfig(BaseSettings):
     
     # Model Selection
     model_name: str = Field(
-        "Qwen/Qwen2.5-72B-Instruct",
-        alias="AGENT_MODEL_NAME",
+        "gemini-3-flash-preview",
+        alias="MODEL_NAME",
         description="LLM model name for the agent"
     )
     
     use_openai: bool = Field(
         False,
-        alias="AGENT_USE_OPENAI",
-        description="Whether to use OpenAI instead of HuggingFace"
+        alias="USE_OPENAI",
+        description="Whether to use OpenAI"
+    )
+    
+    use_gemini: bool = Field(
+        True,
+        alias="USE_GEMINI",
+        description="Whether to use Gemini"
+    )
+    
+    use_hf: bool = Field(
+        False,
+        alias="USE_HF",
+        description="Whether to use HuggingFace"
     )
     
     # Agent Parameters

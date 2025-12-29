@@ -3,14 +3,35 @@ name = "hf-agents-course-final-assignment"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = "==3.11.*"
 dependencies = [
+    "beautifulsoup4>=4.14.3",
     "duckduckgo-search>=8.1.1",
     "gradio>=3.36.1",
     "httpx>=0.28.1",
     "llama-index>=0.14.6",
+    "llama-index-core>=0.14.10",
     "llama-index-embeddings-huggingface>=0.6.1",
+    "llama-index-llms-gemini>=0.6.1",
     "llama-index-llms-huggingface>=0.6.1",
+    "llama-index-llms-huggingface-api>=0.6.1",
+    "llama-index-readers-weather>=0.4.1",
+    "llama-index-readers-wikipedia>=0.4.1",
+    "llama-index-tools-arxiv>=0.4.1",
     "llama-index-workflows>=2.8.3",
-    "pillow>=12.0.0",
+    "loguru>=0.7.3",
+    "lxml>=6.0.2",
+    "nest-asyncio>=1.6.0",
+    "numpy>=2.4.0",
+    "openpyxl>=3.1.5",
+    "pandas>=2.3.3",
+    "pillow>=10.2.0,<11.0.0",
+    "pydantic-settings>=2.12.0",
+    "pyowm>=3.5.0",
+    "pypdf>=6.5.0",
+    "python-docx>=1.2.0",
+    "python-dotenv>=1.2.1",
+    "sympy>=1.14.0",
+    "torch>=2.9.1",
+    "torchvision>=0.24.1",
 ]

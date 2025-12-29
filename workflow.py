@@ -27,14 +27,12 @@ settings = get_settings()
 
 
 # Custom Events
-@dataclass
 class ProcessQueryEvent(Event):
     """Event to process a query with the agent."""
     question: str
     task_id: Optional[str] = None
 
 
-@dataclass
 class ValidateAnswerEvent(Event):
     """Event to validate and clean the answer."""
     raw_answer: str
@@ -42,7 +40,6 @@ class ValidateAnswerEvent(Event):
     task_id: Optional[str] = None
 
 
-@dataclass
 class ErrorEvent(Event):
     """Event for error handling."""
     error: str
@@ -111,8 +108,8 @@ class GAIAAgentWorkflow(Workflow):
         Returns:
             ProcessQueryEvent to trigger agent processing or ErrorEvent
         """
-        question = ev.get("question")
-        task_id = ev.get("task_id")
+        question = getattr(ev, "question", None)
+        task_id = getattr(ev, "task_id", None)
         
         if not question:
             logger.error("No question provided in StartEvent")
@@ -127,9 +124,9 @@ class GAIAAgentWorkflow(Workflow):
             logger.info(f"Task ID: {task_id}")
         
         # Store in context for later use
-        await ctx.set("question", question)
-        await ctx.set("task_id", task_id)
-        await ctx.set("start_time", __import__('time').time())
+        await ctx.store.set("question", question)
+        await ctx.store.set("task_id", task_id)
+        await ctx.store.set("start_time", __import__('time').time())
         
         return ProcessQueryEvent(question=question, task_id=task_id)
     
@@ -154,7 +151,7 @@ class GAIAAgentWorkflow(Workflow):
             agent = self.get_agent()
             
             # Run the agent with retry logic
-            raw_answer = run_agent_with_retry(
+            raw_answer = await run_agent_with_retry(
                 agent=agent,
                 question=ev.question,
                 task_id=ev.task_id,
@@ -162,12 +159,12 @@ class GAIAAgentWorkflow(Workflow):
             )
             
             # Store raw answer in context
-            await ctx.set("raw_answer", raw_answer)
+            await ctx.store.set("raw_answer", raw_answer)
             
             # Calculate elapsed time
-            start_time = await ctx.get("start_time")
+            start_time = await ctx.store.get("start_time")
             elapsed = __import__('time').time() - start_time
-            await ctx.set("elapsed_time", elapsed)
+            await ctx.store.set("elapsed_time", elapsed)
             
             logger.info(f"Agent completed in {elapsed:.2f}s")
             
@@ -217,10 +214,10 @@ class GAIAAgentWorkflow(Workflow):
                 logger.warning(f"Error in answer: {answer}")
             
             # Store final answer in context
-            await ctx.set("final_answer", answer)
+            await ctx.store.set("final_answer", answer)
             
             # Get metadata
-            elapsed_time = await ctx.get("elapsed_time", default=0.0)
+            elapsed_time = await ctx.store.get("elapsed_time") or 0.0
             
             logger.info(f"Final answer: {answer}")
             logger.info(f"Total time: {elapsed_time:.2f}s")
@@ -260,10 +257,10 @@ class GAIAAgentWorkflow(Workflow):
         logger.error(f"Workflow error: {ev.error}")
         
         # Store error in context
-        await ctx.set("error", ev.error)
+        await ctx.store.set("error", ev.error)
         
         # Get elapsed time if available
-        start_time = await ctx.get("start_time", default=None)
+        start_time = await ctx.store.get("start_time")
         elapsed_time = 0.0
         if start_time:
             elapsed_time = __import__('time').time() - start_time

@@ -18,3 +18,7 @@ __pycache__/
 
 # cursor
 .cursorindexingignore
+
+# logs
+logs/
+*.logs
