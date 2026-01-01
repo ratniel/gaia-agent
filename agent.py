@@ -35,7 +35,7 @@ def create_agent(
     Returns:
         Configured ReActAgent instance
     """
-    logger.info("Creating enhanced agent with structured outputs...")
+    logger.info("Creating agent...")
     
     settings = get_settings()
     
@@ -48,25 +48,28 @@ def create_agent(
     
     # Initialize LLM based on flags
     model_name = settings.agent.model_name
+    use_openai = settings.agent.use_openai
+    use_gemini = settings.agent.use_gemini
+    use_hf = settings.agent.use_hf
     
-    if settings.agent.use_openai:
+    logger.info(f"Model: {model_name} | Gemini: {use_gemini} | HF: {use_hf}")
+    
+    if use_openai:
         llm = OpenAI(
             model=model_name,
             temperature=settings.agent.temperature,
         )
         logger.info(f"Using OpenAI model: {model_name}")
-    elif settings.agent.use_gemini:
-        # LlamaIndex Gemini usually expects models/ prefix for some operations
-        full_model_name = model_name if model_name.startswith("models/") else f"models/{model_name}"
+    elif use_gemini:
         llm = GoogleGenAI(
-            model=full_model_name,
+            model=model_name,
             temperature=settings.agent.temperature,
             api_key=settings.api.gemini_api_key,
             max_retries=3,
             is_function_calling_model=True,
         )
-        logger.info(f"Using Gemini model: {full_model_name}")
-    elif settings.agent.use_hf:
+        logger.info(f"Using Gemini model: {model_name}")
+    elif use_hf:
         if not settings.api.hf_token:
             raise ValueError("HuggingFace token not found. Set HF_TOKEN in .env")
         
@@ -75,27 +78,32 @@ def create_agent(
             token=settings.api.hf_token,
             temperature=settings.agent.temperature,
             provider="auto",
+            # provider='zai-org',
+            additional_kwargs={
+                "max_new_tokens": 1024,
+                "bill_to": "discord-community"
+            }
         )
         logger.info(f"Using HuggingFace model: {model_name}")
     else:
-        # Fallback to model name detection if no flags set
-        if any(x in model_name.lower() for x in ["gpt-", "o1-"]):
-            llm = OpenAI(model=model_name, temperature=settings.agent.temperature)
-        elif "gemini" in model_name.lower():
-            full_model_name = model_name if model_name.startswith("models/") else f"models/{model_name}"
+        # Fallback to model name detection
+        if "gemini" in model_name.lower():
             llm = GoogleGenAI(
-                model=full_model_name,
+                model=model_name,
                 temperature=settings.agent.temperature,
                 api_key=settings.api.gemini_api_key,
                 max_retries=3,
                 is_function_calling_model=True,
             )
+        elif any(x in model_name.lower() for x in ["gpt-", "o1-"]):
+            llm = OpenAI(model=model_name, temperature=settings.agent.temperature)
         else:
             llm = HuggingFaceInferenceAPI(
                 model_name=model_name,
                 token=settings.api.hf_token,
                 temperature=settings.agent.temperature,
                 provider="auto",
+                additional_kwargs={"max_new_tokens": 1024}
             )
         logger.info(f"Using detected model: {model_name}")
     
@@ -145,19 +153,42 @@ async def run_agent(
         else:
             question_with_context = question
         
-        # Run the agent
-        response = await agent.run(user_msg=question_with_context)
+        # Run the agent with internal retry for rate limits
+        max_rate_limit_retries = 3
+        for rate_attempt in range(max_rate_limit_retries + 1):
+            try:
+                # Try achat if available, otherwise fallback to run
+                if hasattr(agent, 'achat'):
+                    response = await agent.achat(message=question_with_context)
+                    raw_response = str(response.response if hasattr(response, 'response') else response)
+                else:
+                    response = await agent.run(user_msg=question_with_context)
+                    raw_response = str(response.response if hasattr(response, 'response') else response)
+                break # Success
+            except Exception as run_err:
+                err_msg = str(run_err)
+                if ("429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg) and rate_attempt < max_rate_limit_retries:
+                    logger.warning(f"Internal Rate Limit hit. Waiting 60s (attempt {rate_attempt+1}/{max_rate_limit_retries})...")
+                    await asyncio.sleep(60.0)
+                    continue
+                
+                if rate_attempt == max_rate_limit_retries:
+                    logger.error(f"Failed after {max_rate_limit_retries} rate limit retries.")
+                    raise run_err
+                
+                # For non-rate-limit errors, just try run as fallback once
+                logger.warning(f"Error calling agent: {run_err}. Trying agent.run as fallback...")
+                response = await agent.run(user_msg=question_with_context)
+                raw_response = str(response.response if hasattr(response, 'response') else response)
+                break
         
-        # Extract answer based on response type
         # Extract answer based on response type
         if isinstance(response, AgentResponse):
             # Structured output - answer is already clean
             answer = response.answer
             logger.info(f"Confidence: {response.confidence}")
             logger.info(f"Tools used: {response.tools_used}")
-        elif hasattr(response, 'response'):
-            # Standard response object
-            raw_response = str(response.response)
+        else:
             logger.info(f"Raw response from agent: {raw_response}")
             
             # Check if this is a string representation of AgentResponse (Gemini often does this)
@@ -173,14 +204,6 @@ async def run_agent(
                     if json_match:
                         logger.info(f"Found JSON block: {json_match.group()}")
                         json_text = json_match.group()
-                    elif '","confidence":' in raw_response:
-                        # Handle malformed case
-                        logger.info("Handling malformed Gemini JSON response...")
-                        text = raw_response
-                        if text.lower().startswith("assistant:"):
-                            text = text[10:].strip()
-                        json_text = f'{{"answer": "{text}'
-                        logger.info(f"Reconstructed JSON: {json_text}")
                     
                     if json_text:
                         data = json.loads(json_text)
@@ -192,10 +215,6 @@ async def run_agent(
                     logger.warning(f"Failed to parse JSON from response: {parse_err}")
             
             answer = clean_answer(raw_response, is_gemini=is_gemini)
-        else:
-            # Fallback to string conversion
-            answer = str(response)
-            answer = clean_answer(answer, is_gemini=settings.agent.use_gemini)
         
         logger.info(f"Agent answer: {answer}")
         return answer
@@ -218,6 +237,12 @@ def clean_answer(answer: str, is_gemini: bool = False) -> str:
     Returns:
         Cleaned answer suitable for GAIA submission
     """
+    # Try to extract from "FINAL ANSWER: [answer]"
+    import re
+    final_answer_match = re.search(r"FINAL ANSWER:\s*(.*)", answer, re.IGNORECASE | re.DOTALL)
+    if final_answer_match:
+        answer = final_answer_match.group(1).strip()
+
     # Remove common prefixes
     prefixes_to_remove = [
         "FINAL ANSWER:",
@@ -246,6 +271,15 @@ def clean_answer(answer: str, is_gemini: bool = False) -> str:
     # Strip whitespace
     answer = answer.strip()
     
+    # If there's still a lot of text (e.g. reasoning didn't use FINAL ANSWER),
+    # try to take the last line if it's short
+    if "\n" in answer and len(answer) > 100:
+        lines = [l.strip() for l in answer.split("\n") if l.strip()]
+        if lines:
+            last_line = lines[-1]
+            if len(last_line) < 50:
+                answer = last_line
+    
     return answer
 
 
@@ -256,7 +290,7 @@ async def run_agent_with_retry(
     max_retries: Optional[int] = None
 ) -> str:
     """
-    Run agent with retry logic for API failures.
+    Run agent with retry logic for API failures, including rate limits.
     
     Args:
         agent: The configured ReActAgent
@@ -268,22 +302,36 @@ async def run_agent_with_retry(
         The agent's answer or error message
     """
     import time
+    import random
     
     settings = get_settings()
     
     if max_retries is None:
-        max_retries = settings.agent.max_retries
+        # Increase default retries for rate limits
+        max_retries = max(settings.agent.max_retries, 5)
     
-    retry_delay = settings.agent.retry_delay
+    base_delay = settings.agent.retry_delay
     
     for attempt in range(max_retries + 1):
         try:
             return await run_agent(agent, question, task_id)
         
         except Exception as e:
+            error_str = str(e)
+            is_rate_limit = "429" in error_str or "RESOURCE_EXHAUSTED" in error_str
+            
             if attempt < max_retries:
-                logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {retry_delay}s...")
-                await asyncio.sleep(retry_delay)
+                # Exponential backoff with jitter
+                delay = base_delay * (2 ** attempt) + (random.random() * base_delay)
+                
+                # If specifically a rate limit, ensure we wait at least 30-60s
+                if is_rate_limit:
+                    delay = max(delay, 30.0 + random.random() * 10)
+                    logger.warning(f"Rate limit hit. Waiting {delay:.2f}s before retry {attempt + 1}/{max_retries}...")
+                else:
+                    logger.warning(f"Attempt {attempt + 1} failed: {e}. Retrying in {delay:.2f}s...")
+                
+                await asyncio.sleep(delay)
             else:
                 logger.error(f"All {max_retries + 1} attempts failed")
                 return f"Error after {max_retries + 1} attempts: {str(e)}"
@@ -292,7 +340,7 @@ async def run_agent_with_retry(
 if __name__ == "__main__":
     # Test the enhanced agent
     print("=" * 80)
-    print("Testing Enhanced Agent with Structured Outputs")
+    print("Testing Enhanced Agent without Structured Outputs")
     print("=" * 80)
     
     try:
@@ -309,7 +357,7 @@ if __name__ == "__main__":
         
         # Create agent
         print("\n2. Creating agent...")
-        agent = create_agent(use_structured_output=True, verbose=True)
+        agent = create_agent(use_structured_output=False, verbose=True)
         print("✓ Agent created")
         
         # Test with a simple question

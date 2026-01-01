@@ -9,7 +9,7 @@ class AgentConfig(BaseSettings):
     
     # Model Selection
     model_name: str = Field(
-        "gemini-3-flash-preview",
+        "gemini-2.5-flash",
         alias="MODEL_NAME",
         description="LLM model name for the agent"
     )
@@ -56,7 +56,7 @@ class AgentConfig(BaseSettings):
     )
     
     use_structured_output: bool = Field(
-        True,
+        False,
         alias="AGENT_USE_STRUCTURED_OUTPUT",
         description="Whether to use structured LLM outputs"
     )
@@ -70,13 +70,20 @@ class AgentConfig(BaseSettings):
     )
     
     retry_delay: float = Field(
-        1.0,
+        15.0,
         alias="AGENT_RETRY_DELAY",
         ge=0.0,
         description="Delay between retries in seconds"
     )
     
+    timeout: float = Field(
+        300.0,
+        alias="AGENT_TIMEOUT",
+        description="Timeout for agent execution in seconds"
+    )
+    
     model_config = {
+        "env_file": ".env",
         "env_prefix": "AGENT_",
         "case_sensitive": False,
         "extra": "ignore",

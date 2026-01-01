@@ -56,11 +56,11 @@ class GAIAAgent:
         print(f"[Agent] Question: {question[:100]}...")
         
         try:
-            # Run the enhanced workflow with structured outputs
+            # Run the enhanced workflow without structured outputs
             answer = run_workflow_sync(
                 question=question,
                 task_id=task_id,
-                use_structured_output=True,  # Always use structured outputs
+                use_structured_output=False,  # Don't use structured outputs
                 verbose=False  # Keep logs minimal for Gradio
             )
             

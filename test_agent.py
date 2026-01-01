@@ -11,11 +11,11 @@ from typing import Dict, List, Optional
 from datetime import datetime
 
 from workflow import run_workflow
-from config import get_settings
+from config import reload_settings
 from models.questions import GAIAQuestion, GAIAResult
 
-# Get settings
-settings = get_settings()
+# Force reload settings to clear cache and pick up .env changes
+settings = reload_settings()
 
 
 def fetch_random_question() -> Optional[Dict]:
@@ -84,14 +84,14 @@ async def test_single_question(verbose: bool = True):
     print("-" * 80)
     
     # Run the agent
-    print("\nRunning enhanced agent with structured outputs...\n")
+    print("\nRunning enhanced agent without structured outputs...\n")
     start_time = datetime.now()
     
     try:
         result = await run_workflow(
             question=question,
             task_id=task_id,
-            use_structured_output=True,
+            use_structured_output=False,
             verbose=verbose
         )
         
@@ -168,7 +168,7 @@ async def test_batch_questions(
             result = await run_workflow(
                 question=question,
                 task_id=task_id,
-                use_structured_output=True,
+                use_structured_output=False,
                 verbose=verbose
             )
             
@@ -250,7 +250,7 @@ async def test_batch_questions(
     summary = {
         "timestamp": timestamp,
         "model": settings.agent.model_name,
-        "use_structured_output": True,
+        "use_structured_output": False,
         "total": num_questions,
         "correct": correct_count,
         "accuracy": (correct_count/num_questions)*100,

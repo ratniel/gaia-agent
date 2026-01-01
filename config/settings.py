@@ -34,6 +34,17 @@ def get_settings() -> Settings:
     )
 
 
+def reload_settings() -> Settings:
+    """
+    Clear the settings cache and reload from environment/.env.
+    
+    Returns:
+        Fresh Settings instance
+    """
+    get_settings.cache_clear()
+    return get_settings()
+
+
 def validate_settings() -> list[str]:
     """
     Validate settings and return list of issues.

@@ -42,7 +42,7 @@ async def test_question(question_data, index):
         result = await run_workflow(
             question=question,
             task_id=task_id,
-            use_structured_output=True,
+            use_structured_output=False,
             verbose=False
         )
         

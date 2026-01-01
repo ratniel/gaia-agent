@@ -67,8 +67,9 @@ class GAIAAgentWorkflow(Workflow):
     
     def __init__(
         self,
-        use_structured_output: bool = True,
+        use_structured_output: bool = False,
         verbose: bool = False,
+        timeout: float = 300.0,
         **kwargs
     ):
         """
@@ -77,8 +78,9 @@ class GAIAAgentWorkflow(Workflow):
         Args:
             use_structured_output: Whether to use structured LLM outputs
             verbose: Whether to print detailed logs
+            timeout: Maximum execution time in seconds
         """
-        super().__init__(**kwargs)
+        super().__init__(timeout=timeout, **kwargs)
         
         self.use_structured_output = use_structured_output
         self.verbose = verbose
@@ -175,7 +177,7 @@ class GAIAAgentWorkflow(Workflow):
             )
         
         except Exception as e:
-            logger.error(f"Error processing query: {e}", exc_info=True)
+            logger.error("Error processing query: {}", e, exc_info=True)
             return ErrorEvent(
                 error=str(e),
                 question=ev.question,
@@ -279,7 +281,7 @@ class GAIAAgentWorkflow(Workflow):
 async def run_workflow(
     question: str,
     task_id: Optional[str] = None,
-    use_structured_output: bool = True,
+    use_structured_output: bool = False,
     verbose: bool = False
 ) -> dict[str, Any]:
     """
@@ -296,12 +298,14 @@ async def run_workflow(
     """
     workflow = GAIAAgentWorkflow(
         use_structured_output=use_structured_output,
-        verbose=verbose
+        verbose=verbose,
+        timeout=settings.agent.timeout
     )
     
     result = await workflow.run(
         question=question,
-        task_id=task_id
+        task_id=task_id,
+        timeout=settings.agent.timeout
     )
     
     return result
@@ -310,7 +314,7 @@ async def run_workflow(
 def run_workflow_sync(
     question: str,
     task_id: Optional[str] = None,
-    use_structured_output: bool = True,
+    use_structured_output: bool = False,
     verbose: bool = False
 ) -> str:
     """
@@ -379,7 +383,7 @@ if __name__ == "__main__":
             
             result = await run_workflow(
                 question=question,
-                use_structured_output=True,
+                use_structured_output=False,
                 verbose=True
             )
             
